@@ -12,7 +12,8 @@
 
     <title>Hello, world!</title>
     <link rel="stylesheet" href="style.css">
-<!-- Go to www.addthis.com/dashboard to customize your tools --> <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5eb257e11d89b5ba"></script>
+    <!-- Go to www.addthis.com/dashboard to customize your tools -->
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5eb257e11d89b5ba"></script>
 </head>
 
 <body>
@@ -58,10 +59,12 @@
         <h2 class="subtitle">나의 체질은 무엇일까?</h2>
     </section>
     <section class="youtube">
+
+        <!--
         <div class="container mt-5 youtube-cover d-flex flex-row-reverse">
             <img src="img/youtube-copy.jpg" alt="" class="youtube-icon">
             <a href="" class="youtube-link">PAPAPLAYING유튜브</a>
-        </div>
+        </div>-->
     </section>
     <script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
     <div class="container file-upload">
@@ -80,23 +83,24 @@
                 <div class="spinner-border" role="status">
                     <span class="sr-only">Loading...</span>
                 </div>
-                <p class="text-center">AI가 당신의 동물상을 분석중입니다.</p>
+                <p class="text-center">AI is analyzing now.</p>
             </div>
 
             <p class="result-message"></p>
-            <div id="label-container"></div>
+            <div id="label-container" class="d-flex flex-column justify-content-around"></div>
 
-                 <!-- Go to www.addthis.com/dashboard to customize your tools --> <div class="addthis_inline_share_toolbox_uy8z"></div> 
-            
-            <div class="image-title-wrap">
-                <button type="button" onclick="removeUpload()" class="remove-image">Remove
-                    <span class="image-title">Uploaded Image</span>
+            <!-- Go to www.addthis.com/dashboard to customize your tools -->
+            <div class="addthis_inline_share_toolbox_uy8z"></div>
+
+            <div class="pt-3 image-title-wrap">
+                <button type="button p-2" onclick="window.location.reload();" class="try-again-btn">
+                    <span class="try-again-text">TRY AGAIN</span>
                 </button>
+
             </div>
         </div>
     </div>
-    
-    <div id="label-container"></div>
+
     <div id="disqus_thread"></div>
     <script>
         /**
@@ -180,7 +184,9 @@
             // append elements to the DOM
             labelContainer = document.getElementById("label-container");
             for (let i = 0; i < maxPredictions; i++) { // and class labels
-                labelContainer.appendChild(document.createElement("div"));
+ var element = document.createElement("div")
+                element.classList.add("d-flex");
+                labelContainer.appendChild(element);
             }
         }
         // run the webcam image through the image model
@@ -190,29 +196,70 @@
             const prediction = await model.predict(image, false);
             prediction.sort((a, b) => parseFloat(b.probability) - parseFloat(a.probability));
             console.log(prediction[0].className);
-            var resultMessege
+            var resultTitle, resultExplain, resultCeleb;
             switch (prediction[0].className) {
                 case "태양인":
-                    resultMessege = "태양인"
+                    resultTitle = "창의력이 뛰어난 태양인"
+                    resultExplain = "직관력과 탁월한 재주가 많으며 강직한 품성을 가지고 있는 당신은 태양인 입니다. 태양인은 창의력이 뛰어난 사람이 많습니다. 태양인은 폐가 크고 간이 작습니다."
+                    resultCeleb = "태양인에게 좋은 음식은...입니다."
                     break;
                 case "태음인":
-                    resultMessege = "태음인"
+                    resultTitle = "끈기 있고 과묵한 성격의 태음인"
+                    resultExplain = "포기하지 않는 성격의 당신은 태음인입니다. 기억력이 좋으며 직관적이고 판단력이 요구되는 것보다 반복적인 일을 잘합니다. 태음인은 간이 크고 폐가 작습니다."
+                    resultCeleb = "태음인에게 좋은 음식은...입니다."
+                    break;
+                case "소양인":
+                    resultTitle = "자신의 감정에 충실한 소양인"
+                    resultExplain = "강렬한 눈빛을 가진 당신은 소양인입니다. 순간순간 자신의 감정에 충실하며 다른 사람의 기분을 파악하는 감정은 발달하나, 혼자 궁리하고 몰입하는 사고 기능은 약합니다."
+                    resultCeleb = "소양인에게 좋은 음식은...입니다."
                     break;
                 case "소음인":
-                    resultMessege = "소음인"
+                    resultTitle = "미남 미녀형인 당신은 소음인"
+                    resultExplain = "공동체 생활을 싫어하고 내성적인 성향의 당신은 소음인 입니다. 소음인은 논리적인 사고력이 뛰어납니다. 소음인은 위장이 약해 소화기 질환이 많이 걸립니다."
+                    resultCeleb = "소음인에게 좋은 음식은...입니다."
                     break;
                 default:
-                    resultMessege = "소양인"
+                    resultTitle = "알수없음"
+                    resultExplain = ""
+                    resultCeleb = ""
             }
-            $('.result-message').html(resultMessege);
+            var title = "<div class='" + prediction[0].className + "-animal-title'>" + resultTitle + "</div>"
+            var explain = "<div class='animal-explain pt-2'>" + resultExplain + "</div>"
+            var celeb = "<div class='" + prediction[0].className + "-animal-celeb pt-2 pb-2'>" + resultCeleb + "</div>"
+            $('.result-message').html(title + explain + celeb);
+            var barWidth;
             for (let i = 0; i < maxPredictions; i++) {
-                const classPrediction =
-                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-                labelContainer.childNodes[i].innerHTML = classPrediction;
+                if (prediction[i].probability.toFixed(2) > 0.1) {
+                    barWidth = Math.round(prediction[i].probability.toFixed(2) * 100) + "%";
+                } else if (prediction[i].probability.toFixed(2) >= 0.01) {
+                    barWidth = "4%"
+                } else {
+                    barWidth = "2%"
+                }
+                var labelTitle;
+                switch (prediction[i].className) {
+                    case "태양인":
+                        labelTitle = "태양인"
+                        break;
+                    case "태음인":
+                        labelTitle = "태음인"
+                        break;
+                    case "소양인":
+                        labelTitle = "소양인"
+                        break;
+                    case "소음인":
+                        labelTitle = "소음인"
+                        break;
+                    default:
+                        labelTitle = "알수없음"
+                }
+                var label = "<div class='animal-label d-flex align-items-center'>" + labelTitle + "</div>"
+                var bar = "<div class='bar-container position-relative container'><div class='" + prediction[i].className + "-box'></div><div class='d-flex justify-content-center align-items-center " + prediction[i].className + "-bar' style='width: " + barWidth + "'><span class='d-block percent-text'>" + Math.round(prediction[i].probability.toFixed(2) * 100) + "%</span></div></div>"
+                labelContainer.childNodes[i].innerHTML = label + bar;
             }
         }
     </script>
-    
+
 </body>
 <!-- Copyright (c) 2020 by Aaron Vanston (https://codepen.io/aaronvanston/pen/yNYOXR)
 
